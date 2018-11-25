@@ -3,13 +3,13 @@ extern crate clap;
 #[macro_use]
 extern crate serde_derive;
 extern crate ansi_term;
-extern crate chrono;
 extern crate subprocess;
 extern crate text_io;
 
 mod errors;
 mod kubectl;
 mod policies;
+mod rules;
 
 use ansi_term::Colour::Red;
 use clap::Arg;
@@ -27,8 +27,9 @@ fn app() -> Result<(), Box<std::error::Error>> {
 
     let labels = matches.value_of("labels");
     let policies = get_network_policies(labels)?;
+    let rules = policies.into_rules();
 
-    println!("{:#?}", policies);
+    println!("{:#?}", rules);
 
     return Ok(());
 }

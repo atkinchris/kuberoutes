@@ -1,4 +1,3 @@
-use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 
 #[derive(Debug, Deserialize)]
@@ -7,10 +6,22 @@ pub struct PodSelector {
   pub match_labels: HashMap<String, String>,
 }
 
+impl PodSelector {
+  pub fn to_str(&self) -> String {
+    self
+      .match_labels
+      .iter()
+      .map(|(k, v)| format!("{}={}", k, v))
+      .collect::<Vec<String>>()
+      .join(",")
+      .to_string()
+  }
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RulePodSelector {
-  pod_selector: PodSelector,
+  pub pod_selector: PodSelector,
 }
 
 #[derive(Debug, Deserialize)]
@@ -19,9 +30,15 @@ pub struct Port {
   pub protocol: String,
 }
 
+impl Port {
+  pub fn to_str(&self) -> String {
+    format!("{} ({})", self.port, self.protocol)
+  }
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
-pub enum Rule {
+pub enum PolicyRule {
   Ingress {
     from: Vec<RulePodSelector>,
     ports: Vec<Port>,
@@ -33,39 +50,23 @@ pub enum Rule {
 }
 
 #[derive(Debug, Deserialize)]
-#[serde(untagged)]
-pub enum Spec {
-  #[serde(rename_all = "camelCase")]
-  Ingress {
-    ingress: Vec<Rule>,
-    pod_selector: PodSelector,
-    policy_types: Vec<String>,
-  },
-
-  #[serde(rename_all = "camelCase")]
-  Egress {
-    egress: Vec<Rule>,
-    pod_selector: PodSelector,
-    policy_types: Vec<String>,
-  },
-}
-
-#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct MetaData {
-  pub creation_timestamp: DateTime<Utc>,
+pub struct PolicySpec {
+  pub pod_selector: PodSelector,
+  pub policy_types: Vec<String>,
+  #[serde(default)]
+  pub ingress: Vec<PolicyRule>,
+  #[serde(default)]
+  pub egress: Vec<PolicyRule>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Item {
-  pub spec: Spec,
-  pub metadata: MetaData,
+  pub spec: PolicySpec,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Manifest {
-  pub api_version: String,
   pub items: Vec<Item>,
-  pub kind: String,
 }
