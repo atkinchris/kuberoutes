@@ -27,8 +27,9 @@ fn app() -> Result<(), Box<std::error::Error>> {
 
     let labels = matches.value_of("labels");
     let policies = get_network_policies(labels)?;
+    let connections = policies.into_connections();
 
-    println!("{:#?}", policies);
+    println!("{:#?}", connections);
 
     return Ok(());
 }

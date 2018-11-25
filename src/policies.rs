@@ -33,21 +33,14 @@ pub enum Rule {
 }
 
 #[derive(Debug, Deserialize)]
-#[serde(untagged)]
-pub enum Spec {
-  #[serde(rename_all = "camelCase")]
-  Ingress {
-    ingress: Vec<Rule>,
-    pod_selector: PodSelector,
-    policy_types: Vec<String>,
-  },
-
-  #[serde(rename_all = "camelCase")]
-  Egress {
-    egress: Vec<Rule>,
-    pod_selector: PodSelector,
-    policy_types: Vec<String>,
-  },
+#[serde(rename_all = "camelCase")]
+pub struct PolicySpec {
+  pub pod_selector: PodSelector,
+  pub policy_types: Vec<String>,
+  #[serde(default)]
+  pub ingress: Vec<Rule>,
+  #[serde(default)]
+  pub egress: Vec<Rule>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -58,7 +51,7 @@ pub struct MetaData {
 
 #[derive(Debug, Deserialize)]
 pub struct Item {
-  pub spec: Spec,
+  pub spec: PolicySpec,
   pub metadata: MetaData,
 }
 
@@ -68,4 +61,27 @@ pub struct Manifest {
   pub api_version: String,
   pub items: Vec<Item>,
   pub kind: String,
+}
+
+#[derive(Debug)]
+pub struct Connection {}
+
+impl Manifest {
+  fn find_latest_policy_of_type(&self, policy_type: &str) -> Option<&PolicySpec> {
+    self
+      .items
+      .iter()
+      .filter(|item| item.spec.policy_types.contains(&policy_type.to_owned()))
+      .max_by_key(|item| item.metadata.creation_timestamp)
+      .map(|item| &item.spec)
+  }
+
+  pub fn into_connections(self) -> Vec<Connection> {
+    let connections = Vec::new();
+
+    let active_ingress_policy = self.find_latest_policy_of_type("Ingress");
+    let active_igress_policy = self.find_latest_policy_of_type("Egress");
+
+    return connections;
+  }
 }
