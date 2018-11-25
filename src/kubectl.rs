@@ -2,10 +2,11 @@ extern crate serde;
 extern crate serde_json;
 
 use errors::ApplicationError;
+use policies::Manifest;
 use std::error::Error;
 use subprocess::{Exec, Redirection};
 
-pub fn get_network_policies(labels: Option<&str>) -> Result<String, ApplicationError> {
+pub fn get_network_policies(labels: Option<&str>) -> Result<Manifest, ApplicationError> {
   let mut args = vec!["get", "networkpolicies", "-o", "json"];
 
   if let Some(labels_value) = labels {

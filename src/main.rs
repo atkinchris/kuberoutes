@@ -1,14 +1,16 @@
-extern crate ansi_term;
 #[macro_use]
 extern crate clap;
+#[macro_use]
 extern crate serde_derive;
+extern crate ansi_term;
 extern crate subprocess;
 extern crate text_io;
 
 mod errors;
 mod kubectl;
+mod policies;
 
-use ansi_term::Colour::{Green, Red};
+use ansi_term::Colour::Red;
 use clap::Arg;
 use kubectl::get_network_policies;
 
@@ -25,7 +27,7 @@ fn app() -> Result<(), Box<std::error::Error>> {
     let labels = matches.value_of("labels");
     let policies = get_network_policies(labels)?;
 
-    println!("{}", Green.paint(policies));
+    println!("{:#?}", policies);
 
     return Ok(());
 }
