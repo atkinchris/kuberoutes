@@ -1,20 +1,26 @@
 use std::collections::HashMap;
 
 #[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PodSelector {
-  pub match_labels: HashMap<String, String>,
+#[serde(untagged)]
+pub enum PodSelector {
+  #[serde(rename_all = "camelCase")]
+  MatchLabels {
+    match_labels: HashMap<String, String>,
+  },
+  MatchAll {},
 }
 
 impl PodSelector {
   pub fn to_str(&self) -> String {
-    self
-      .match_labels
-      .iter()
-      .map(|(k, v)| format!("{}={}", k, v))
-      .collect::<Vec<String>>()
-      .join(",")
-      .to_string()
+    match self {
+      PodSelector::MatchLabels { match_labels } => match_labels
+        .iter()
+        .map(|(k, v)| format!("{}={}", k, v))
+        .collect::<Vec<String>>()
+        .join(",")
+        .to_string(),
+      PodSelector::MatchAll {} => format!("*"),
+    }
   }
 }
 
@@ -40,11 +46,15 @@ impl Port {
 #[serde(untagged)]
 pub enum PolicyRule {
   Ingress {
+    #[serde(default)]
     from: Vec<RulePodSelector>,
+    #[serde(default)]
     ports: Vec<Port>,
   },
   Egress {
+    #[serde(default)]
     to: Vec<RulePodSelector>,
+    #[serde(default)]
     ports: Vec<Port>,
   },
 }

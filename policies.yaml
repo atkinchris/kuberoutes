@@ -1,0 +1,37 @@
+apiVersion: extensions/v1beta1
+kind: NetworkPolicy
+metadata:
+  name: web-allow
+spec:
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              role: tester
+  podSelector:
+    matchLabels:
+      app: web
+---
+apiVersion: extensions/v1beta1
+kind: NetworkPolicy
+metadata:
+  name: web-deny-all
+spec:
+  podSelector:
+    matchLabels:
+      app: web
+  policyTypes:
+    - Ingress
+---
+apiVersion: extensions/v1beta1
+kind: NetworkPolicy
+metadata:
+  name: web-allow-egress
+spec:
+  podSelector:
+    matchLabels:
+      app: web
+  egress:
+    - {}
+  policyTypes:
+    - Egress
