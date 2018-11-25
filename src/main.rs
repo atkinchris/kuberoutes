@@ -3,6 +3,7 @@ extern crate clap;
 #[macro_use]
 extern crate serde_derive;
 extern crate ansi_term;
+extern crate chrono;
 extern crate subprocess;
 extern crate text_io;
 

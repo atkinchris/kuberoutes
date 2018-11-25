@@ -1,6 +1,4 @@
-extern crate serde;
-extern crate serde_json;
-
+use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 
 #[derive(Debug, Deserialize)]
@@ -53,8 +51,15 @@ pub enum Spec {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MetaData {
+  pub creation_timestamp: DateTime<Utc>,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct Item {
   pub spec: Spec,
+  pub metadata: MetaData,
 }
 
 #[derive(Debug, Deserialize)]
